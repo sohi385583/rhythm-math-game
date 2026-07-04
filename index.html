@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Sea Vector Navigator - Level 3 Rhythm Challenge</title>
+    <!-- Google Fonts: Sci-Fi & Modern Monospace -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Outfit:wght@300;400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="game-container" id="game-container">
+        <!-- Start Screen Overlay -->
+        <div class="overlay-screen" id="start-overlay">
+            <div class="overlay-title">RHYTHM NAVIGATOR</div>
+            <div class="overlay-desc">
+                テンポ（リズム）に合わせて正負の計算を解くチャレンジです。<br><br>
+                <strong>【8拍のルール】</strong><br>
+                ・1〜4拍目: 式が1拍ごとに順番に表示されます。<br>
+                ・5〜8拍目: 解答時間です。2つの選択肢から正しい答えを選んでください。<br>
+                （早く答えても次の問題は次の1拍目から始まります。リズムをキープしましょう！）<br><br>
+                <strong>【ライフ制限】</strong><br>
+                ・持ちライフは 3 です。3回ミス（誤答または時間切れ）するとゲームオーバーになります。<br><br>
+                <span style="color: var(--neon-green);">[左の答え ➔ A / 左キー / クリック]</span> &nbsp;
+                <span style="color: var(--neon-pink);">[右の答え ➔ D / 右キー / クリック]</span>
+            </div>
+            <button class="btn-next" id="btn-start-game">START MISSION (ENTER)</button>
+        </div>
+
+        <!-- Game Over Overlay -->
+        <div class="overlay-screen" id="end-overlay" style="display: none;">
+            <div class="overlay-title" style="color: var(--neon-pink);">MISSION COMPLETE</div>
+            <div class="overlay-desc">システムが停止しました。今回のシミュレーション結果を出力します。</div>
+
+            <div class="overlay-stats">
+                <div class="stat-row">
+                    <span>FINAL SCORE:</span>
+                    <span class="stat-val" id="final-score">0000</span>
+                </div>
+                <div class="stat-row">
+                    <span>CORRECT ANSWERS:</span>
+                    <span class="stat-val" id="final-correct">0 / 0</span>
+                </div>
+                <div class="stat-row">
+                    <span>ACCURACY RATE:</span>
+                    <span class="stat-val" id="final-accuracy">0%</span>
+                </div>
+            </div>
+
+            <button class="btn-next" id="btn-restart-game">PLAY AGAIN (ENTER)</button>
+        </div>
+
+        <header>
+            <h1>DEEP SEA VECTOR NAVIGATOR</h1>
+            <div class="subtitle">RHYTHM NAVIGATION - LEVEL 3 RHYTHM</div>
+        </header>
+
+        <!-- Status Details -->
+        <div class="status-panel">
+            <div class="status-item">
+                <span class="status-label">LIFE</span>
+                <span class="status-value highlight" id="life-display">❤️❤️❤️</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">COMBO</span>
+                <span class="status-value highlight" id="combo-display">0</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">SCORE</span>
+                <span class="status-value highlight" id="score-display">0000</span>
+            </div>
+            <div class="status-item">
+                <span class="status-label">METRONOME</span>
+                <button class="sound-toggle" id="btn-sound-toggle">SOUND: ON</button>
+            </div>
+        </div>
+
+        <!-- Beat Indicator Bar -->
+        <div class="beat-indicator-container">
+            <div class="beat-label">REVEAL PHASE</div>
+            <div class="beat-nodes">
+                <div class="beat-node" id="node-1"><span class="beat-number">1</span></div>
+                <div class="beat-node" id="node-2"><span class="beat-number">2</span></div>
+                <div class="beat-node" id="node-3"><span class="beat-number">3</span></div>
+                <div class="beat-node" id="node-4"><span class="beat-number">4</span></div>
+            </div>
+            <div class="beat-label">INPUT PHASE</div>
+            <div class="beat-nodes">
+                <div class="beat-node target-node" id="node-5"><span class="beat-number">5</span></div>
+                <div class="beat-node target-node" id="node-6"><span class="beat-number">6</span></div>
+                <div class="beat-node target-node" id="node-7"><span class="beat-number">7</span></div>
+                <div class="beat-node target-node" id="node-8"><span class="beat-number">8</span></div>
+            </div>
+        </div>
+
+        <!-- Problem / Instructions -->
+        <div class="instruction-box">
+            <div class="instruction-title">MISSION OBJECTIVE</div>
+            <div class="instruction-text" id="instruction-msg">
+                拍子に合わせて表示される式を計算し、残り4拍（5〜8拍目）の間に入力してください。
+            </div>
+        </div>
+
+        <!-- Formula Display Area -->
+        <div class="rhythm-formula-container">
+            <div class="formula-block" id="formula-term1">&nbsp;</div>
+            <div class="formula-block operator-block" id="formula-operator">&nbsp;</div>
+            <div class="formula-block" id="formula-term2">&nbsp;</div>
+            <div class="formula-block equals-block" id="formula-equals">&nbsp;</div>
+            <div class="formula-block result-block" id="formula-result">?</div>
+        </div>
+
+        <!-- Choice Buttons -->
+        <div class="controls-section">
+            <div class="choice-container">
+                <button class="choice-btn" id="btn-choice-left" disabled>
+                    <span class="choice-val" id="val-choice-left">?</span>
+                    <span class="choice-key">A</span>
+                </button>
+                <button class="choice-btn" id="btn-choice-right" disabled>
+                    <span class="choice-val" id="val-choice-right">?</span>
+                    <span class="choice-key">D</span>
+                </button>
+            </div>
+
+            <div class="feedback-message neutral" id="feedback">
+                STANDBY: Tap START MISSION to align vectors.
+            </div>
+        </div>
+
+        <div class="keyboard-tip">
+            KEYBOARD INPUTS: <span class="key-badge">A</span> / <span class="key-badge">&larr;</span> (LEFT CHOICE)
+            &nbsp;|&nbsp; <span class="key-badge">D</span> / <span class="key-badge">&rarr;</span> (RIGHT CHOICE)<br>
+            メトロノームの音（テンポ: 100 BPM）に合わせて、一定のリズムで判断を繰り返します。
+        </div>
+    </div>
+
+    <!-- Game script -->
+    <script src="game.js" defer></script>
+</body>
+
+</html>
